@@ -1,0 +1,27 @@
+{
+  "steam_api_key": {
+    "description": "Steam Web API Key，用于获取在线人数等数据。留空则降级跳过在线人数查询。",
+    "type": "string",
+    "default": ""
+  },
+  "price_region": {
+    "description": "Steam Store API 价格区域代码，默认为中国区 (cn)。",
+    "type": "string",
+    "default": "cn"
+  },
+  "review_count": {
+    "description": "获取评论的数量上限",
+    "type": "number",
+    "default": 5
+  },
+  "request_timeout": {
+    "description": "HTTP 请求超时时间（秒）",
+    "type": "number",
+    "default": 15
+  },
+  "enable_fallback_commands": {
+    "description": "是否启用 /steam 兜底命令组",
+    "type": "boolean",
+    "default": true
+  }
+}

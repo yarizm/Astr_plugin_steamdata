@@ -1,0 +1,5 @@
+name: astrbot_plugin_steamdata
+description: 查询 Steam 游戏信息（在线人数、价格、评分、评论），经 LLM 总结后推送给用户
+author: YARIZM
+version: 0.1.0
+repo: ""
