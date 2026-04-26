@@ -2,6 +2,7 @@ import asyncio
 import aiohttp
 from typing import Optional, Dict, Any, List
 from ..models.game_data import GameData, ReviewItem
+from ..models.user_data import PlayerSummary, OwnedGame, InventoryItem
 from astrbot.api import logger
 
 
@@ -136,3 +137,116 @@ class SteamAPIService:
                             ))
         except Exception as e:
             logger.error(f"获取评论失败 ({appid}): {e}")
+
+    async def resolve_vanity_url(self, username: str) -> Optional[str]:
+        """将自定义 URL 转换为 SteamID64"""
+        if not self.api_key:
+            return None
+        url = f"https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/?key={self.api_key}&vanityurl={username}"
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout) as session:
+                async with session.get(url) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        response = data.get("response", {})
+                        if response.get("success") == 1:
+                            return response.get("steamid")
+        except Exception as e:
+            logger.error(f"解析 VanityURL 失败 ({username}): {e}")
+        return None
+
+    async def get_player_summary(self, steam_id: str) -> Optional[PlayerSummary]:
+        """获取玩家概要信息"""
+        if not self.api_key:
+            return None
+        url = f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={self.api_key}&steamids={steam_id}"
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout) as session:
+                async with session.get(url) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        players = data.get("response", {}).get("players", [])
+                        if players:
+                            p = players[0]
+                            return PlayerSummary(
+                                steamid=p.get("steamid", ""),
+                                personaname=p.get("personaname", ""),
+                                profileurl=p.get("profileurl", ""),
+                                avatar=p.get("avatarfull", ""),
+                                personastate=p.get("personastate", 0),
+                                gameextrainfo=p.get("gameextrainfo", ""),
+                                gameid=p.get("gameid", "")
+                            )
+        except Exception as e:
+            logger.error(f"获取玩家概要失败 ({steam_id}): {e}")
+        return None
+
+    async def get_owned_games(self, steam_id: str) -> List[OwnedGame]:
+        """获取拥有的游戏列表"""
+        if not self.api_key:
+            return []
+        url = f"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={self.api_key}&steamid={steam_id}&include_appinfo=true&include_played_free_games=true"
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout) as session:
+                async with session.get(url) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        games = data.get("response", {}).get("games", [])
+                        owned_games = []
+                        for g in games:
+                            owned_games.append(OwnedGame(
+                                appid=g.get("appid", 0),
+                                name=g.get("name", ""),
+                                playtime_forever=g.get("playtime_forever", 0),
+                                playtime_2weeks=g.get("playtime_2weeks", 0)
+                            ))
+                        return owned_games
+        except Exception as e:
+            logger.error(f"获取玩家拥有的游戏失败 ({steam_id}): {e}")
+        return []
+
+    async def get_user_inventory(self, steam_id: str, appid: int, limit: int = 50) -> List[InventoryItem]:
+        """获取用户指定游戏的库存（提取前 limit 个）"""
+        url = f"https://steamcommunity.com/inventory/{steam_id}/{appid}/2?l=english&count=2000"
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout) as session:
+                async with session.get(url) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        descriptions = {f"{d['classid']}_{d['instanceid']}": d for d in data.get("descriptions", [])}
+                        assets = data.get("assets", [])
+                        
+                        items = []
+                        for asset in assets:
+                            classid = asset.get("classid")
+                            instanceid = asset.get("instanceid")
+                            desc = descriptions.get(f"{classid}_{instanceid}", {})
+                            
+                            tags = desc.get("tags", [])
+                            
+                            items.append(InventoryItem(
+                                appid=appid,
+                                contextid=asset.get("contextid", "2"),
+                                assetid=asset.get("assetid", ""),
+                                classid=str(classid),
+                                instanceid=str(instanceid),
+                                name=desc.get("name", ""),
+                                market_name=desc.get("market_name", ""),
+                                type=desc.get("type", ""),
+                                icon_url=f"https://steamcommunity-a.akamaihd.net/economy/image/{desc.get('icon_url')}" if desc.get('icon_url') else "",
+                                tradable=bool(desc.get("tradable", 0)),
+                                descriptions=[d.get("value", "") for d in desc.get("descriptions", []) if d.get("value")],
+                                tags=tags
+                            ))
+                            if len(items) >= limit:
+                                break
+                        return items
+                    elif resp.status == 429:
+                        logger.error("获取库存触发频率限制 (429)")
+                    elif resp.status == 403:
+                        logger.error("获取库存被拒绝 (可能设置了私密)")
+                    else:
+                        logger.error(f"获取库存失败，状态码: {resp.status}")
+        except Exception as e:
+            logger.error(f"获取库存出错 ({steam_id}, {appid}): {e}")
+        return []
