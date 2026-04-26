@@ -11,45 +11,25 @@ class SteamAPIService:
         self.price_region = price_region
         self.review_count = review_count
         self.timeout = aiohttp.ClientTimeout(total=timeout)
-        self.app_list: List[Dict[str, Any]] = []
-
-    async def _fetch_app_list(self) -> None:
-        """获取并缓存全量 App 列表"""
-        if self.app_list:
-            return
-
-        url = "https://api.steampowered.com/ISteamApps/GetAppList/v2/"
+    async def search_game(self, game_name: str) -> Optional[int]:
+        """根据游戏名搜索 appid（使用 storesearch API）"""
+        url = f"https://store.steampowered.com/api/storesearch/?term={game_name}&l=english&cc={self.price_region}"
         try:
             async with aiohttp.ClientSession(timeout=self.timeout) as session:
                 async with session.get(url) as resp:
                     if resp.status == 200:
                         data = await resp.json()
-                        self.app_list = data.get("applist", {}).get("apps", [])
-                        logger.info(f"成功获取 Steam App 列表，共 {len(self.app_list)} 个条目。")
+                        items = data.get("items", [])
+                        if not items:
+                            return None
+                        # 返回第一个匹配结果的 id
+                        return items[0].get("id")
                     else:
-                        logger.error(f"获取 Steam App 列表失败，状态码: {resp.status}")
+                        logger.error(f"Steam storesearch 失败，状态码: {resp.status}")
+                        return None
         except Exception as e:
-            logger.error(f"获取 Steam App 列表出错: {e}")
-
-    async def search_game(self, game_name: str) -> Optional[int]:
-        """根据游戏名搜索 appid，不区分大小写，尝试模糊匹配"""
-        await self._fetch_app_list()
-        if not self.app_list:
-            raise Exception("未能获取 Steam App 列表。")
-
-        target_name = game_name.lower()
-        
-        # 精确匹配（忽略大小写）
-        for app in self.app_list:
-            if app.get("name", "").lower() == target_name:
-                return app["appid"]
-        
-        # 模糊匹配
-        for app in self.app_list:
-            if target_name in app.get("name", "").lower():
-                return app["appid"]
-
-        return None
+            logger.error(f"获取 Steam storesearch 出错: {e}")
+            return None
 
     async def fetch_game_data(self, game_name: str) -> GameData:
         appid = await self.search_game(game_name)
