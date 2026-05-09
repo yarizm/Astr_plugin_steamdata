@@ -1,5 +1,7 @@
 name: astrbot_plugin_steamdata
-description: 查询 Steam 游戏信息（在线人数、价格、评分、评论），经 LLM 总结后推送给用户
+display_name: Steam 数据查询
+description: 适用于 AstrBot 的 Steam 官方数据查询插件，支持游戏信息、玩家状态、库存等查询
 author: YARIZM
 version: 0.1.0
-repo: ""
+repo: https://github.com/yarizm/Astr_plugin_steamdata
+astrbot_version: ">=4.16,<5"

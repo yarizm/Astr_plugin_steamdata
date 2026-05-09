@@ -1,26 +1,26 @@
 {
   "steam_api_key": {
-    "description": "Steam Web API Key，用于获取在线人数等数据。留空则降级跳过在线人数查询。",
+    "description": "Steam Web API Key。请勿公开该密钥；为空时游戏基础信息、价格和评论仍可查询，但在线人数、玩家状态、游戏库、Vanity URL 解析等依赖 Steam Web API 的能力会降级或不可用。",
     "type": "string",
     "default": ""
   },
   "price_region": {
-    "description": "Steam Store API 价格区域代码，默认为中国区 (cn)。",
+    "description": "Steam 商店价格区域代码，例如 cn、us、jp。用于游戏价格和货币展示，默认 cn。",
     "type": "string",
     "default": "cn"
   },
   "review_count": {
-    "description": "获取评论的数量上限",
+    "description": "每次查询拉取的最新评论数量，建议范围 1-50；类型异常时使用默认值 5。",
     "type": "int",
     "default": 5
   },
   "request_timeout": {
-    "description": "HTTP 请求超时时间（秒）",
+    "description": "Steam HTTP 请求超时时间，单位秒，建议范围 3-60；类型异常时使用默认值 15。",
     "type": "int",
     "default": 15
   },
   "enable_fallback_commands": {
-    "description": "是否启用 /steam 兜底命令组",
+    "description": "是否启用 /steam、/steam_user、/steam_inv 兜底命令。关闭后仍可保留 LLM Tool 调用能力。",
     "type": "bool",
     "default": true
   }
