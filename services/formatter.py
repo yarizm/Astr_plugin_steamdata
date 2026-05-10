@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from ..models.game_data import GameData
-from ..models.user_data import InventoryItem, PlayerSummary
+from models.game_data import GameData
+from models.user_data import InventoryItem, PlayerSummary
 
 
 class MarkdownFormatter:

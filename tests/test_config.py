@@ -1,6 +1,6 @@
 import unittest
 
-from astrbot_plugin_steamdata.config import normalize_config
+from config import normalize_config
 
 
 class ConfigTests(unittest.TestCase):

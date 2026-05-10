@@ -24,10 +24,10 @@ except ModuleNotFoundError:
 
     aiohttp = _MissingAiohttp()
 
-from ..compat import logger
-from ..config import normalize_config
-from ..models.game_data import GameData, ReviewItem
-from ..models.user_data import InventoryItem, OwnedGame, PlayerSummary
+from compat import logger
+from config import normalize_config
+from models.game_data import GameData, ReviewItem
+from models.user_data import InventoryItem, OwnedGame, PlayerSummary
 
 
 class SteamAPIService:

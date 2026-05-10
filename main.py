@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from .compat import AstrMessageEvent, Context, Star, filter, logger
-from .config import normalize_config
-from .services.formatter import MarkdownFormatter
-from .services.steam_api import SteamAPIService
-from .tools.game_info_tool import SteamGameInfoTool
-from .tools.user_inventory_tool import SteamInventoryTool
-from .tools.user_status_tool import SteamUserStatusTool
+from compat import AstrMessageEvent, Context, Star, filter, logger
+from config import normalize_config
+from services.formatter import MarkdownFormatter
+from services.steam_api import SteamAPIService
+from tools.game_info_tool import SteamGameInfoTool
+from tools.user_inventory_tool import SteamInventoryTool
+from tools.user_status_tool import SteamUserStatusTool
 
 
 class AstrBotPluginSteamData(Star):

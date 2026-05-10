@@ -1,6 +1,6 @@
 import unittest
 
-from astrbot_plugin_steamdata.services.steam_api import SteamAPIService
+from services.steam_api import SteamAPIService
 
 
 class FakeSteamAPIService(SteamAPIService):

@@ -1,8 +1,8 @@
 import unittest
 
-from astrbot_plugin_steamdata.models.game_data import GameData, ReviewItem
-from astrbot_plugin_steamdata.models.user_data import InventoryItem, OwnedGame, PlayerSummary
-from astrbot_plugin_steamdata.services.formatter import MarkdownFormatter
+from models.game_data import GameData, ReviewItem
+from models.user_data import InventoryItem, OwnedGame, PlayerSummary
+from services.formatter import MarkdownFormatter
 
 
 class FormatterTests(unittest.TestCase):

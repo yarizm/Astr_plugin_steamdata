@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ..compat import AstrAgentContext, ContextWrapper, Field, FunctionTool, ToolExecResult, dataclass
+from compat import AstrAgentContext, ContextWrapper, Field, FunctionTool, ToolExecResult, dataclass
 
 
 @dataclass
